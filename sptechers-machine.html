@@ -1,0 +1,157 @@
+<!-- Criado por Marise Miranda | 2017.1 -->
+<!-- Adaptado por Matheus Matos | 2025.1 -->
+<!-- Adaptado por Daniel Bueno | 2026.3 -->
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Bueno's Machine</title>
+</head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+  * {
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  .animation {
+    animation: pop-up-animation 4s ease-in-out;
+  }
+
+  @keyframes pop-up-animation {
+    0% {
+      transform: translateY(0);
+    }
+    10% {
+      transform: translateY(-6rem);
+    }
+    95% {
+      transform: translateY(-6rem);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+</style>
+<body class="h-dvh flex flex-col items-center gap-10 bg-teal-500 text-teal-50 tracking-tight overflow-hidden">
+  <h1 class="text-4xl font-bold mt-10 text-shadow-sm text-shadow-teal-700">Bueno's Machine</h1>
+  <section class="max-w-2xl p-5 gap-5 flex flex-col bg-teal-50 text-teal-950 font-medium rounded-xl shadow-sm shadow-teal-700">
+    <h2 class="font-semibold text-xl text-teal-900 p-6">Converta as bases numéricas</h2>
+    <div class="flex flex-col group *:transition-all">
+      <label class="group-focus-within:text-teal-600 cursor-pointer group-hover:text-teal-700" for="iptDec">Decimal:</label>
+      <span class="flex gap-2">
+        <input
+          id="iptDec"
+          type="text"
+          class="outline-none px-2 py-1 border border-teal-800 rounded focus:border-teal-500 focus:text-teal-700 group-hover:border-teal-700 grow"
+          placeholder="Ex: 42"
+          oninput="convert(this)"
+        >
+        <button onclick="copyToClipboard('iptDec')" class="flex h-full items-center hover:scale-105"><i class="ph ph-copy-simple text-xl p-1 cursor-pointer"></i></button>
+      </span>
+    </div>
+    <div class="flex flex-col group *:transition-all">
+      <label class="group-focus-within:text-teal-600 cursor-pointer group-hover:text-teal-700" for="iptOct">Octal:</label>
+      <span class="flex gap-2">
+        <input
+          id="iptOct"
+          type="text"
+          class="outline-none px-2 py-1 border border-teal-800 rounded focus:border-teal-500 focus:text-teal-700 group-hover:border-teal-700 grow"
+          placeholder="Ex: 74"
+          oninput="convert(this)"
+        >
+        <button onclick="copyToClipboard('iptOct')" class="flex h-full items-center hover:scale-105"><i class="ph ph-copy-simple text-xl p-1 cursor-pointer"></i></button>
+      </span>
+    </div>
+    <div class="flex flex-col group *:transition-all">
+      <label class="group-focus-within:text-teal-600 cursor-pointer group-hover:text-teal-700" for="iptHex">Hexadecimal:</label>
+      <span class="flex gap-2">
+        <input
+          id="iptHex"
+          type="text"
+          class="outline-none px-2 py-1 border border-teal-800 rounded focus:border-teal-500 focus:text-teal-700 group-hover:border-teal-700 grow"
+          placeholder="Ex: f5"
+          oninput="convert(this)"
+        >
+        <button onclick="copyToClipboard('iptHex')" class="flex h-full items-center hover:scale-105"><i class="ph ph-copy-simple text-xl p-1 cursor-pointer"></i></button>
+      </span>
+    </div>
+    <div class="flex flex-col group *:transition-all">
+      <label class="group-focus-within:text-teal-600 cursor-pointer group-hover:text-teal-700" for="iptBin">Binário:</label>
+      <span class="flex gap-2">
+        <textarea
+          id="iptBin"
+          type="text"
+          class="outline-none px-2 py-1 border border-teal-800 rounded focus:border-teal-500 focus:text-teal-700 group-hover:border-teal-700 grow resize-none"
+          placeholder="Ex: 1001"
+          oninput="convert(this)"
+        ></textarea>
+        <button onclick="copyToClipboard('iptBin')" class="flex h-full items-center hover:scale-105"><i class="ph ph-copy-simple text-xl p-1 cursor-pointer"></i></button>
+      </span>
+    </div>
+  </section>
+  <div id="popUp" class="absolute flex gap-2 items-center -bottom-20 right-4 bg-teal-50 text-teal-800 font-medium p-4 rounded z-50">
+    <i class="ph ph-clipboard-text text-3xl font-extrabold"></i><p>Conteúdo copiado!</p>
+  </div>
+  <footer class="w-dvw absolute bottom-0 p-2 bg-teal-700">Adaptado por <a href="https://danbueno.com" target="_blank" class="cursor-pointer font-semibold underline">Daniel Bueno</a></footer>
+</body>
+</html>
+<script>
+  const regex = {
+    iptDec: (number) => /^\d+$/.test(number),
+    iptBin: (number) => /^[01]+$/.test(number),
+    iptOct: (number) => /^[0-7]+$/.test(number),
+    iptHex: (number) => /^[0-9a-fA-F]+$/.test(number)
+  }
+
+  const base = {
+    iptDec: 10,
+    iptBin: 2,
+    iptOct: 8,
+    iptHex: 16
+  }
+
+  const convert = (element) => {
+    const inputId = element.id
+    let inputValue = element.value
+
+    if (inputValue == "")
+      inputValue = 0
+
+    if (!regex[inputId](inputValue)){
+      element.classList.add("!border-red-500")
+      element.classList.add("!text-red-500")
+      return
+    }
+    element.classList.remove("!border-red-500")
+    element.classList.remove("!text-red-500")
+
+    const number = parseInt(inputValue, base[inputId])
+
+    iptDec.value = number.toString(10)
+    iptOct.value = number.toString(8)
+    iptBin.value = number.toString(2)
+    iptHex.value = number.toString(16).toUpperCase()
+
+    autoResize(iptBin)
+  }
+
+  const copyToClipboard = (inputId) => {
+    const textInput = document.querySelector(`#${inputId}`).value
+
+    navigator.clipboard.writeText(textInput)
+    .then(() => {
+      popUp.classList.add("animation")
+      setTimeout(() => popUp.classList.remove("animation"), 4000)
+    })
+  }
+
+  const autoResize = (el) => {
+    el.style.height = "auto"
+    el.style.height = el.scrollHeight + "px"
+  }
+</script>
